@@ -139,7 +139,7 @@ def await_response(my_socket, time_sent, timeout):
         return "timeout"
 
 if __name__ == '__main__':
-  send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)
+  send_socket = socket(AF_INET, SOCK_RAW)
   send_socket.setsockopt(SOL_IP, IP_HDRINCL, 1)
   send_socket.bind((HOST, 0))
   
