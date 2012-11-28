@@ -1,10 +1,42 @@
 from socket import *
 from struct import *
+import sys
+import select
+import time
+import binascii
 
 UDP_CODE = getprotobyname('udp')
 assert UDP_CODE == IPPROTO_UDP, "UDP Protocol type mismatch!"
 
 HOST = gethostbyname(gethostname())
+
+def calculate_ip_checksum(ip_packet):
+  length = len(ip_packet)
+  sum = 0
+  count = 0
+  
+  unpacked = unpack('!BBHHHBBH4s4s', ip_packet)
+  #print unpacked
+  
+  for word in unpacked:
+    try:
+      word = int(word)
+    except ValueError:
+      ip = inet_ntoa(word)
+      hexn = ''.join(["%02X" % long(i) for i in ip.split('.')]) # http://code.activestate.com/recipes/65219-ip-address-conversion-functions/
+      word = int(hexn, 16)
+    
+    sum = sum + word
+    
+  sum = (sum >> 16) + (sum & 0xffff);
+  sum = sum + (sum >> 16);
+	#complement and mask to 4 byte short
+  sum = ~sum & 0xffff
+	
+  return sum
+
+def calculate_udp_checksum():
+  pass
 
 def construct_ip_header(hostname):
   '''
@@ -28,28 +60,31 @@ def construct_ip_header(hostname):
   ip_ver = 4 #IPv4 baby -> 4 bits
   ip_ihl = 5 #5 words, 20 bytes (no options) -> 4 bits
   ip_tos = 0 #pretty sure this isn't really used much -> 8 bits
-  ip_tot_len = 0	# TODO: figure out total length ahead of time? -> 16 bits
+  ip_tot_len = 0	# kernel will fill this in (<3)
   ip_id = 1337	#packet id -> 16 bits
   ip_frag_off = 0 #fragmentation offset -> 16 bits
-  ip_ttl = 16 # reduced by one on each hop -> 8 bits
+  ip_ttl = 4 # reduced by one on each hop -> 8 bits
   ip_proto = UDP_CODE #wooo! -> 8 bits
-  ip_checksum = 0	# TODDO: checksum -> 16 bits
+  ip_checksum = 0	# kernel will fill this in (<3)
   ip_source = inet_aton(source_ip)	#convert x.x.x.x to 32-bit packed binary format -> 32 bits
   ip_dest = inet_aton(dest_ip) #convert x.x.x.x to 32-bit packed binary format -> 32 bits
 
   ip_ihlver = (ip_ver << 4) + ip_ihl #combine to get 8 bits
   
-  #! for network order (big endian)
-  #B for unsigned char -> 8 bits
-  #H for unsigned short -> 16 bits
-  #4s for 4 byte (32 bit) string
+  '''
+   ! for network order (big endian)
+   B for unsigned char -> 8 bits
+   H for unsigned short -> 16 bits
+   4s for 4 byte (32 bit) string
+  '''
   ip_header = pack('!BBHHHBBH4s4s', ip_ihlver, ip_tos, ip_tot_len, ip_id, ip_frag_off, ip_ttl, ip_proto, ip_checksum, ip_source, ip_dest)
+  
   return ip_header
 
 def construct_udp_header():
   #everything is 16 bits
   udp_source = 5991	# source port
-  udp_dest = 5991	# destination port
+  udp_dest = 33433	# destination port
   udp_len = 8 #length will just be header length (min 8 bytes) as we will be sending an empty payload
   udp_checksum = 0
   
@@ -63,17 +98,71 @@ def construct_udp_packet():
   return udp_header + payload
 
 def create_packet(hostname):
-  ip_header = construct_ip_header(hostname)
+  ip_header = construct_ip_header(hostname)  
   payload = construct_udp_packet()
   return ip_header + payload
 
+def await_response(my_socket, time_sent, timeout):
+  time_left = timeout
+  
+  while True:
+    ready = select.select([my_socket], [], [], time_left)
+    if ready[0] == []:
+        print "timeout"
+    time_now = time.time()
+    rec_packet, addr = my_socket.recvfrom(5120)
+    
+    unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:20])
+    print unpacked_ip
+    prot = unpacked_ip[6]
+    print prot
+    print unpacked_ip[3] # ip packet id
+    if prot == 1:
+      icmp_header = rec_packet[20:28]
+      print binascii.hexlify(icmp_header)
+      #icmp_payload = rec_packet[29:]
+     # print sys.getsizeof(icmp_payload)
+      unpacked_header = unpack('bbHHh', icmp_header)
+      #unpacked_payload = unpack('s', icmp_payload)
+      print unpacked_header
+      #print unpacked_payload
+      
+      type, code, checksum, p_id, sequence = unpacked_header
+     
+      print p_id
+      
+      if p_id == 1337 or p_id == 5991 or p_id == 33433:
+        return time_now - time_sent
+      time_left -= time_now - time_sent
+      print time_left
+      if time_left <= 0:
+        return "timeout"
+
 if __name__ == '__main__':
-  s = socket(AF_INET, SOCK_RAW, UDP_CODE)
-  s.setsockopt(IPPROTO_IP, IP_HDRINCL, 1)
-  s.bind((HOST, 0)) #is this actually attaching to my ethernet..?
+  send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)
+  send_socket.setsockopt(SOL_IP, IP_HDRINCL, 1)
+  send_socket.bind((HOST, 0))
   
   hostname = 'www.google.com'
   hostip = gethostbyname(hostname)
   
   packet = create_packet(hostname)
-  s.sendto(packet, (hostip , 0))
+  print send_socket.sendto(packet, (hostip , 0))
+  
+  print await_response(send_socket, time.time(), 100)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
