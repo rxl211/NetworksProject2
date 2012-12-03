@@ -63,7 +63,7 @@ def construct_ip_header(hostname):
   ip_tot_len = 0	# kernel will fill this in (<3)
   ip_id = 1337	#packet id -> 16 bits
   ip_frag_off = 0 #fragmentation offset -> 16 bits
-  ip_ttl = 4 # reduced by one on each hop -> 8 bits
+  ip_ttl = 7 # reduced by one on each hop -> 8 bits
   ip_proto = UDP_CODE #wooo! -> 8 bits
   ip_checksum = 0	# kernel will fill this in (<3)
   ip_source = inet_aton(source_ip)	#convert x.x.x.x to 32-bit packed binary format -> 32 bits
@@ -83,7 +83,7 @@ def construct_ip_header(hostname):
 
 def construct_udp_header():
   #everything is 16 bits
-  udp_source = 5991	# source port
+  udp_source = 33433 #20591	# source port
   udp_dest = 33433	# destination port
   udp_len = 8 #length will just be header length (min 8 bytes) as we will be sending an empty payload
   udp_checksum = 0
@@ -101,7 +101,7 @@ def create_packet(hostname):
   ip_header = construct_ip_header(hostname)  
   payload = construct_udp_packet()
   return ip_header + payload
-
+'''
 def await_response(my_socket, time_sent, timeout):
   time_left = timeout
   
@@ -116,8 +116,9 @@ def await_response(my_socket, time_sent, timeout):
     print unpacked_ip
     prot = unpacked_ip[6]
     print prot
-    print unpacked_ip[3] # ip packet id
+    #print unpacked_ip[3] # ip packet id
     if prot == 1:
+      print addr
       icmp_header = rec_packet[20:28]
       print binascii.hexlify(icmp_header)
       #icmp_payload = rec_packet[29:]
@@ -131,25 +132,42 @@ def await_response(my_socket, time_sent, timeout):
      
       print p_id
       
-      if p_id == 1337 or p_id == 5991 or p_id == 33433:
+      if p_id == 1337 or p_id == 20591 or p_id == 33433:
         return time_now - time_sent
       time_left -= time_now - time_sent
       print time_left
       if time_left <= 0:
         return "timeout"
+'''
+
+def await_response(my_socket, time_sent, timeout):
+  time_left = timeout
+  
+  while True:
+    rec_packet, addr = my_socket.recvfrom(5120)
+    unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:20])
+    prot = unpacked_ip[6]
+    print prot
+    if prot == 1:
+      print "in here!"
 
 if __name__ == '__main__':
   send_socket = socket(AF_INET, SOCK_RAW)
   send_socket.setsockopt(SOL_IP, IP_HDRINCL, 1)
-  send_socket.bind((HOST, 0))
+  #send_socket.bind((HOST, 20591))
+  
+  recv_socket = socket(AF_INET, SOCK_RAW)
+  #recv_socket.ioctl(SIO_RCVALL, RCVALL_ON)
+  recv_socket.bind(("", 33433))
+  
   
   hostname = 'www.google.com'
   hostip = gethostbyname(hostname)
   
   packet = create_packet(hostname)
-  print send_socket.sendto(packet, (hostip , 0))
+  print send_socket.sendto(packet, (hostip , 33433))
   
-  print await_response(send_socket, time.time(), 100)
+  print await_response(recv_socket, time.time(), 100)
   
   
   
