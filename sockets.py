@@ -147,9 +147,14 @@ def await_response(my_socket, time_sent, timeout):
     rec_packet, addr = my_socket.recvfrom(5120)
     unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:20])
     prot = unpacked_ip[6]
-    print prot
-    if prot == 1:
-      print "in here!"
+    if prot == 17:
+      print "UDP (" + str((unpacked_ip[3])) + ")"
+    elif prot == 6:
+      print "TCP (" + str((unpacked_ip[3])) + ")"
+    elif prot == 1:
+      print "ICMP (WOOOOOOOOOO!) (" + str((unpacked_ip[3])) + ")"
+    else:
+      print str(prot) + "(" + str((unpacked_ip[3])) + ")"
 
 if __name__ == '__main__':
   send_socket = socket(AF_INET, SOCK_RAW)
@@ -157,8 +162,9 @@ if __name__ == '__main__':
   #send_socket.bind((HOST, 20591))
   
   recv_socket = socket(AF_INET, SOCK_RAW)
-  #recv_socket.ioctl(SIO_RCVALL, RCVALL_ON)
-  recv_socket.bind(("", 33433))
+  recv_socket.bind((HOST, 33433))
+  recv_socket.ioctl(SIO_RCVALL, RCVALL_ON)
+  
   
   
   hostname = 'www.google.com'
