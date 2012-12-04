@@ -10,34 +10,6 @@ assert UDP_CODE == IPPROTO_UDP, "UDP Protocol type mismatch!"
 
 HOST = gethostbyname(gethostname())
 
-def calculate_ip_checksum(ip_packet):
-  length = len(ip_packet)
-  sum = 0
-  count = 0
-  
-  unpacked = unpack('!BBHHHBBH4s4s', ip_packet)
-  #print unpacked
-  
-  for word in unpacked:
-    try:
-      word = int(word)
-    except ValueError:
-      ip = inet_ntoa(word)
-      hexn = ''.join(["%02X" % long(i) for i in ip.split('.')]) # http://code.activestate.com/recipes/65219-ip-address-conversion-functions/
-      word = int(hexn, 16)
-    
-    sum = sum + word
-    
-  sum = (sum >> 16) + (sum & 0xffff);
-  sum = sum + (sum >> 16);
-	#complement and mask to 4 byte short
-  sum = ~sum & 0xffff
-	
-  return sum
-
-def calculate_udp_checksum():
-  pass
-
 def construct_ip_header(hostname):
   '''
                 8 bits        8 bits                   16 bits               = 32 bits
@@ -63,7 +35,7 @@ def construct_ip_header(hostname):
   ip_tot_len = 0	# kernel will fill this in (<3)
   ip_id = 1337	#packet id -> 16 bits
   ip_frag_off = 0 #fragmentation offset -> 16 bits
-  ip_ttl = 7 # reduced by one on each hop -> 8 bits
+  ip_ttl = 5 # reduced by one on each hop -> 8 bits
   ip_proto = UDP_CODE #wooo! -> 8 bits
   ip_checksum = 0	# kernel will fill this in (<3)
   ip_source = inet_aton(source_ip)	#convert x.x.x.x to 32-bit packed binary format -> 32 bits
@@ -83,7 +55,7 @@ def construct_ip_header(hostname):
 
 def construct_udp_header():
   #everything is 16 bits
-  udp_source = 33433 #20591	# source port
+  udp_source = 20591 #20591	# source port
   udp_dest = 33433	# destination port
   udp_len = 8 #length will just be header length (min 8 bytes) as we will be sending an empty payload
   udp_checksum = 0
@@ -101,44 +73,6 @@ def create_packet(hostname):
   ip_header = construct_ip_header(hostname)  
   payload = construct_udp_packet()
   return ip_header + payload
-'''
-def await_response(my_socket, time_sent, timeout):
-  time_left = timeout
-  
-  while True:
-    ready = select.select([my_socket], [], [], time_left)
-    if ready[0] == []:
-        print "timeout"
-    time_now = time.time()
-    rec_packet, addr = my_socket.recvfrom(5120)
-    
-    unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:20])
-    print unpacked_ip
-    prot = unpacked_ip[6]
-    print prot
-    #print unpacked_ip[3] # ip packet id
-    if prot == 1:
-      print addr
-      icmp_header = rec_packet[20:28]
-      print binascii.hexlify(icmp_header)
-      #icmp_payload = rec_packet[29:]
-     # print sys.getsizeof(icmp_payload)
-      unpacked_header = unpack('bbHHh', icmp_header)
-      #unpacked_payload = unpack('s', icmp_payload)
-      print unpacked_header
-      #print unpacked_payload
-      
-      type, code, checksum, p_id, sequence = unpacked_header
-     
-      print p_id
-      
-      if p_id == 1337 or p_id == 20591 or p_id == 33433:
-        return time_now - time_sent
-      time_left -= time_now - time_sent
-      print time_left
-      if time_left <= 0:
-        return "timeout"
-'''
 
 def await_response(my_socket, time_sent, timeout):
   time_left = timeout
@@ -157,15 +91,13 @@ def await_response(my_socket, time_sent, timeout):
       print str(prot) + "(" + str((unpacked_ip[3])) + ")"
 
 if __name__ == '__main__':
-  send_socket = socket(AF_INET, SOCK_RAW)
-  send_socket.setsockopt(SOL_IP, IP_HDRINCL, 1)
+  send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)
+  send_socket.setsockopt(IPPROTO_IP, IP_HDRINCL, 1)
   #send_socket.bind((HOST, 20591))
   
-  recv_socket = socket(AF_INET, SOCK_RAW)
-  recv_socket.bind((HOST, 33433))
-  recv_socket.ioctl(SIO_RCVALL, RCVALL_ON)
-  
-  
+  recv_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)
+  recv_socket.bind((HOST, 20591))
+  recv_socket.ioctl(SIO_RCVALL, RCVALL_ON)  
   
   hostname = 'www.google.com'
   hostip = gethostbyname(hostname)
@@ -174,15 +106,6 @@ if __name__ == '__main__':
   print send_socket.sendto(packet, (hostip , 33433))
   
   print await_response(recv_socket, time.time(), 100)
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   
