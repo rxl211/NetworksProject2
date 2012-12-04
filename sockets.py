@@ -87,16 +87,17 @@ def await_response(my_socket, time_sent, timeout):
   while True:
     rec_packet = my_socket.recv(5120)
     print "we passed read"
-    unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:20])
+    unpacked_ip = unpack('!BBHHHBBH4s4s', rec_packet[0:19]) #0:20
     prot = unpacked_ip[6]
-    if prot == 17:
-      print "UDP (" + str((unpacked_ip[3])) + ")"
-    elif prot == 6:
-      print "TCP (" + str((unpacked_ip[3])) + ")"
-    elif prot == 1:
-      print "ICMP (WOOOOOOOOOO!) (" + str((unpacked_ip[3])) + ")"
-    else:
-      print str(prot) + "(" + str((unpacked_ip[3])) + ")"
+    assert prot == 1
+    icmp_header = unpack('!BBH', rec_packet[20:23] #21:24
+    icmp_type = icmp_header[0]
+    icmp_code = icmp_header[1]
+
+    if (icmp_type == 11 and icmp_code == 0):
+      orig_ip_header = unpack('!BBHHHBBH4s4s', rec_packet[28:47]) #29-48
+      orig_udp_header = unpack('!HHHH', rec_packet[48:55]) #49:56
+      print 'yoyoyo'
 
 if __name__ == '__main__':
   send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)
