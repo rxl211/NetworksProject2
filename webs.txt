@@ -1,0 +1,7 @@
+Calculating number of hops to webs.com [75.98.17.19] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  80.6ms 76.88ms 186.28ms  <=> 70.42.26.66 
+12:  * * * 
+10:  * * * 
+9:  * * * 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  8

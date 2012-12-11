@@ -1,0 +1,7 @@
+Calculating number of hops to kickstarter.com [107.22.185.97] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  * * * 
+4:  27.09ms 27.43ms 38.54ms  <=> 216.24.186.89 
+6:  40.22ms 62.23ms 58.17ms  <=> 205.251.245.5 
+7:  42.8ms 44.64ms 44.13ms  <=> 205.251.245.47 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  7

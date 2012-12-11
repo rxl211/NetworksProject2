@@ -1,0 +1,8 @@
+Calculating number of hops to dh818.com [211.151.66.113] with timeout set to 0.75 seconds per probe
+16:  385.86ms 384.41ms 492.21ms  <=> 211.151.56.2 
+32:  283.9ms 282.29ms 284.52ms  <=> 211.151.66.113 
+24:  287.74ms 293.52ms 280.9ms  <=> 211.151.66.113 
+20:  279.65ms * 284.32ms  <=> 211.151.66.113 
+18:  283.45ms * 281.76ms  <=> 211.151.66.113 
+17:  * 290.62ms * 
+Looks like we're done! Number of hops:  17

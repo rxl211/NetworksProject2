@@ -1,0 +1,7 @@
+Calculating number of hops to smashingmagazine.com [80.72.139.101] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  211.28ms 154.83ms 162.24ms  <=> 145.254.15.182 
+12:  161.59ms 158.07ms 164.28ms  <=> 80.72.139.101 
+10:  167.92ms 178.34ms 167.01ms  <=> 80.72.130.170 
+11:  252.93ms 158.21ms 160.48ms  <=> 80.72.130.162 
+Looks like we're done! Number of hops:  12

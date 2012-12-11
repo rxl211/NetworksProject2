@@ -1,0 +1,7 @@
+Calculating number of hops to mediaset.it [91.211.156.128] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  * * * 
+4:  33.73ms 28.15ms 28.14ms  <=> 216.24.186.89 
+6:  171.65ms 165.85ms 166.2ms  <=> 93.186.128.102 
+7:  * * * 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  6

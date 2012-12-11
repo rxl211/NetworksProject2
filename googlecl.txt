@@ -1,0 +1,7 @@
+Calculating number of hops to google.cl [173.194.37.88] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  * * * 
+4:  29.49ms 27.09ms 36.04ms  <=> 216.24.186.89 
+6:  * * * 
+5:  162.27ms 78.77ms 96.85ms  <=> 216.24.186.90 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  5

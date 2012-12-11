@@ -1,0 +1,7 @@
+Calculating number of hops to facebook.com [69.171.224.32] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  * * * 
+4:  28.86ms 48.3ms 162.72ms  <=> 216.24.186.89 
+6:  128.59ms 131.49ms 139.98ms  <=> 80.91.253.146 
+7:  130.53ms 124.88ms 145.6ms  <=> 213.155.133.37 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  7

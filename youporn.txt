@@ -1,0 +1,7 @@
+Calculating number of hops to youporn.com [31.192.116.24] with timeout set to 0.75 seconds per probe
+16:  136.95ms 197.28ms 157.34ms  <=> 31.192.116.24 
+8:  139.26ms 140.73ms 129.35ms  <=> 213.248.93.38 
+12:  162.38ms 291.96ms 201.74ms  <=> 31.192.116.24 
+10:  150.57ms * 130.63ms  <=> 31.192.116.24 
+9:  134.02ms 132.23ms 210.11ms  <=> 31.192.115.150 
+Looks like we're done! Number of hops:  10

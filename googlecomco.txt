@@ -1,0 +1,7 @@
+Calculating number of hops to google.com.co [173.194.37.55] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  * * * 
+4:  121.44ms 107.61ms 188.21ms  <=> 216.24.186.89 
+6:  * * * 
+5:  60.42ms 48.8ms 29.84ms  <=> 216.24.186.90 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  5

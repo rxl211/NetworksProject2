@@ -1,0 +1,7 @@
+Calculating number of hops to mynet.com [212.101.97.6] with timeout set to 0.75 seconds per probe
+16:  * * * 
+8:  157.06ms 154.77ms 156.64ms  <=> 213.248.100.150 
+12:  185.39ms 237.07ms 194.68ms  <=> 82.222.224.78 
+14:  209.21ms 193.68ms 224.6ms  <=> 82.222.13.109 
+15:  * * * 
+Looks like we're done! Number of hops:  Never reached destination, but max before timeout was  14
